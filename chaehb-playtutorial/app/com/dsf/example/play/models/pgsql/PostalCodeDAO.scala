@@ -7,7 +7,8 @@ import com.dsf.example.play.models.entities._
 import play.api.db.slick.DatabaseConfigProvider
 import slick.driver.JdbcProfile
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, ExecutionContext}
 
 /**
   * Created by chaehb on 11/08/2016.
@@ -27,16 +28,15 @@ class PostalCodeDAO  @Inject() (dbConfigProvider: DatabaseConfigProvider)(implic
     tableQuery.length.result
   }
 
-  def insertPostalCode(row:PostalCode) = db.run {
+  def insertPostalCode(row:PostalCode) = Await.result(db.run {
     tableQuery += row
-  }
+  }, Duration.Inf)
 
-  def insertPostalCodes(rows:List[PostalCode]) = db.run {
+  def insertPostalCodes(rows:List[PostalCode]) = Await.result(db.run {
     tableQuery ++= rows
-  }
+  }, Duration.Inf)
 
-  private class PostalCodesTable(tag: Tag) extends Table[PostalCode](tag,"postalcodes") {
-  //  def uuid = column[UUID]("uuid", O.PrimaryKey)
+  private class PostalCodesTable(tag: Tag) extends Table[PostalCode](tag,"PostalCodes") {
     // primary informations
     def postalCode = column[Option[String]]("postal_code")
 
@@ -92,6 +92,7 @@ class PostalCodeDAO  @Inject() (dbConfigProvider: DatabaseConfigProvider)(implic
 
     private val toRow:(PostalCodeTupleType => PostalCode) = {tuple =>
       PostalCode(
+       // uuid = tuple._1,
         postalCode = tuple._1,
         streetNumberAddress = StreetNumberAddress.tupled.apply(tuple._2),
         additionalAddress = AdditionalAddress.tupled.apply(tuple._3)
