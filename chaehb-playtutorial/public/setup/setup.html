@@ -24,11 +24,15 @@
         $.ajax({
             method:"POST",
             url:"/setup",
-            contentType:"application/json",
-            dataType:"json",
+           // contentType:"application/json",
+           // dataType:"json",
             data:'{}',
+            beforeSend:function(){
+                alert("대기")
+            },
             success:function(result,status,xhr){
-                window.location.href = "/index.html";
+               alert("완료")
+                //window.location.href = "/index.html";
             },
             error:function (xhr,status,err) {
                 alert(err);

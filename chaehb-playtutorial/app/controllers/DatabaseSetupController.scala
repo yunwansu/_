@@ -3,9 +3,11 @@ package controllers
 import java.io.File
 import javax.inject.Inject
 
+import com.dsf.example.play.ApplicationConfig
 import com.dsf.example.play.models.entities.{AdditionalAddress, PostalCode, StreetNumberAddress}
 import com.dsf.example.play.models.pgsql.PostalCodeDAO
 import play.api.mvc.{Action, Controller}
+import play.api.routing.JavaScriptReverseRouter
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.io.Source
@@ -16,6 +18,7 @@ import scala.io.Source
 class DatabaseSetupController @Inject()(postalCodeDAO: PostalCodeDAO)(implicit ec: ExecutionContext) extends Controller {
 
   def setup = Action.async {implicit request =>
+    JavaScriptReverseRouter
     println("do setup")
     postalCodeDAO.createTable.onComplete(_ => {
 
@@ -107,12 +110,13 @@ class DatabaseSetupController @Inject()(postalCodeDAO: PostalCodeDAO)(implicit e
               }) // end File
             }
           }
+          ApplicationConfig.DataBaseReady = true
         }else{
-
+          printf("Error")
+          Future(BAD_REQUEST)
         }
       })
     })
-
     Future(Ok)
   }
 }

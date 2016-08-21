@@ -27,6 +27,7 @@ class PostalCodeDAO  @Inject() (dbConfigProvider: DatabaseConfigProvider)(implic
   def count = db.run {
     tableQuery.length.result
   }
+  def close = db.close()
 
   def insertPostalCode(row:PostalCode) = Await.result(db.run {
     tableQuery += row
@@ -36,7 +37,7 @@ class PostalCodeDAO  @Inject() (dbConfigProvider: DatabaseConfigProvider)(implic
     tableQuery ++= rows
   }, Duration.Inf)
 
-  private class PostalCodesTable(tag: Tag) extends Table[PostalCode](tag,"PostalCodes") {
+  private class PostalCodesTable(tag: Tag) extends Table[PostalCode](tag,"postal_codes") {
     // primary informations
     def postalCode = column[Option[String]]("postal_code")
 
