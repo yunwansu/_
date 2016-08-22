@@ -12,9 +12,9 @@ case class PostalCode(
 
                         additionalAddress: AdditionalAddress
                      )
-//object PostalCode {
-//  implicit val jsonFormat = Json.format[PostalCode]
-//}
+/*object PostalCode {
+  implicit val jsonFormat = Json.format[PostalCode]
+}*/
 
 case class StreetNumberAddress(
                                 province:Option[String]=None, provinceEn:Option[String]=None, // 시도 - 1, 2
@@ -23,9 +23,15 @@ case class StreetNumberAddress(
 
                                 streetNameCode:Option[String]=None, streetName:Option[String]=None, streetNameEn:Option[String]=None // 도로명코드, 도로명 - 7, 8, 9
                               )
-//object StreetNumberAddress {
-//  implicit val jsonFormat = Json.format[StreetNumberAddress]
-//}
+/*object StreetNumberAddress {
+  implicit val jsonFormat = Json.format[StreetNumberAddress]{
+    def writes(a : StreetNumberAddress):JsValue = {
+      Json.obj(
+        "id" -> JsString(a.county.get)
+      )
+    }
+  }
+}*/
 
 case class AdditionalAddress(
                               basement:Option[String]=None, mountain:Option[String]=None, // '지하'여부, '산'여부 - 10, 20

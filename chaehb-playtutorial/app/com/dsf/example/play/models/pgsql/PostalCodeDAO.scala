@@ -8,11 +8,12 @@ import play.api.db.slick.DatabaseConfigProvider
 import slick.driver.JdbcProfile
 
 import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, ExecutionContext}
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 /**
   * Created by chaehb on 11/08/2016.
   */
+
 class PostalCodeDAO  @Inject() (dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext){
   private val dbConfig = dbConfigProvider.get[JdbcProfile]
   import dbConfig._
@@ -36,6 +37,14 @@ class PostalCodeDAO  @Inject() (dbConfigProvider: DatabaseConfigProvider)(implic
   def insertPostalCodes(rows:List[PostalCode]) = Await.result(db.run {
     tableQuery ++= rows
   }, Duration.Inf)
+
+  def all:Future[Seq[PostalCode]] = db.run(
+    tableQuery.result
+  )
+
+  /*def findbycounty(country :String = ""):Future[Seq[PostalCode]] = db.run(
+    tableQuery.filter(_.county == country).result
+  )*/
 
   private class PostalCodesTable(tag: Tag) extends Table[PostalCode](tag,"postal_codes") {
     // primary informations

@@ -7,7 +7,6 @@ import com.dsf.example.play.ApplicationConfig
 import com.dsf.example.play.models.entities.{AdditionalAddress, PostalCode, StreetNumberAddress}
 import com.dsf.example.play.models.pgsql.PostalCodeDAO
 import play.api.mvc.{Action, Controller}
-import play.api.routing.JavaScriptReverseRouter
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.io.Source
@@ -18,7 +17,6 @@ import scala.io.Source
 class DatabaseSetupController @Inject()(postalCodeDAO: PostalCodeDAO)(implicit ec: ExecutionContext) extends Controller {
 
   def setup = Action.async {implicit request =>
-    JavaScriptReverseRouter
     println("do setup")
     postalCodeDAO.createTable.onComplete(_ => {
 
@@ -96,7 +94,7 @@ class DatabaseSetupController @Inject()(postalCodeDAO: PostalCodeDAO)(implicit e
                   val postalCode = PostalCode(Some(columns(0)),streetNumberAddress,additionalAddress)
                   list = postalCode :: list
                   i += 1
-                  if(i % 1000 == 0){  // or map yield
+                  if(i % 10000 == 0){  // or map, yield
                     postalCodeDAO.insertPostalCodes(list)
                     i = 0;
                     list = Nil
@@ -111,12 +109,15 @@ class DatabaseSetupController @Inject()(postalCodeDAO: PostalCodeDAO)(implicit e
             }
           }
           ApplicationConfig.DataBaseReady = true
+        Future(Ok(ApplicationConfig.DataBaseReady.toString))
         }else{
           printf("Error")
           Future(BAD_REQUEST)
         }
       })
     })
-    Future(Ok)
+    //Future.successful(Ok)
+    Future(Ok(ApplicationConfig.DataBaseReady.toString))
   }
+
 }

@@ -15,7 +15,7 @@ class AppFilter @Inject()(implicit override val mat: Materializer, exec: Executi
 
   override def apply(filter: (RequestHeader) => Future[Result])(requestHeader: RequestHeader): Future[Result] = {
     filter(requestHeader).map(result =>{
-      if(ApplicationConfig.DataBaseReady){  //db가 준비되어있다면
+      if(ApplicationConfig.DataBaseReady){
         if(requestHeader.uri.startsWith("/setup")){
           Results.NotFound
         }else{

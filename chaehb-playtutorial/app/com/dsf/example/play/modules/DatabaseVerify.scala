@@ -32,6 +32,7 @@ class DatabaseVerify @Inject()(postalCodeDAO: PostalCodeDAO,lifecycle: Applicati
       ApplicationConfig.DataBaseReady = false
   }
   lifecycle.addStopHook{() =>
+    println("DB Close")
     Future.successful(postalCodeDAO.close)
   }
 }

@@ -8,13 +8,18 @@
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.3/css/bootstrap.min.css">
+    <style>
+        .center{ text-align: center; position: relative; }
+    </style>
 </head>
 <body>
-<h1>Setup Database</h1>
-<button type="button" id="myButton" class="btn btn-primary" onclick="doSetup();">
-    Do It!
+<div class="center">
+<h1 >Setup Database</h1>
+<p>데이터베이스가 존재 하지 않습니다.</p>
+<button type="button" id="myButton" class="btn btn-primary" onclick="doSetup();" >
+    초기화
 </button>
-
+</div>
 <!-- jQuery first, then Tether, then Bootstrap JS. -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.3.4/js/tether.min.js"></script>
@@ -24,15 +29,18 @@
         $.ajax({
             method:"POST",
             url:"/setup",
-           // contentType:"application/json",
-           // dataType:"json",
+            //contentType:"application/json",
+            //dataType:"json",
             data:'{}',
             beforeSend:function(){
                 alert("대기")
             },
             success:function(result,status,xhr){
-               alert("완료")
                 //window.location.href = "/index.html";
+                alert("완료")
+            },
+            complete:function (result) {
+                alert(result)
             },
             error:function (xhr,status,err) {
                 alert(err);
