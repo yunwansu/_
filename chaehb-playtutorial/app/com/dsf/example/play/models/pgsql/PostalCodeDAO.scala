@@ -1,17 +1,19 @@
 package com.dsf.example.play.models.pgsql
 
-import java.util.UUID
+//import java.util.UUID
 import javax.inject.Inject
 
 import com.dsf.example.play.models.entities._
 import play.api.db.slick.DatabaseConfigProvider
 import slick.driver.JdbcProfile
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.duration.Duration
+import scala.concurrent.{Await, ExecutionContext, Future}
 
 /**
   * Created by chaehb on 11/08/2016.
   */
+
 class PostalCodeDAO  @Inject() (dbConfigProvider: DatabaseConfigProvider)(implicit ec: ExecutionContext){
   private val dbConfig = dbConfigProvider.get[JdbcProfile]
   import dbConfig._
@@ -26,18 +28,47 @@ class PostalCodeDAO  @Inject() (dbConfigProvider: DatabaseConfigProvider)(implic
   def count = db.run {
     tableQuery.length.result
   }
+  def close = db.close()
 
-  def insertPostalCode(row:PostalCode) = db.run {
+  def insertPostalCode(row:PostalCode) = Await.result(db.run {
     tableQuery += row
-  }
+  }, Duration.Inf)
 
-  def insertPostalCodes(rows:List[PostalCode]) = db.run {
+  def insertPostalCodes(rows:List[PostalCode]) = Await.result(db.run {
     tableQuery ++= rows
+  }, Duration.Inf)
+
+  def all:Future[Seq[PostalCode]] = db.run(
+    tableQuery.result
+  )
+
+  def findbycounty(country :String = ""):Future[Option[PostalCode]] = db.run(
+    tableQuery.filter(_.county === country).result.headOption
+  )
+
+  def listcounty(county:String = ""):Future[PostalCode] = db.run{
+    val dbio = (for{
+      postalCode <- tableQuery if postalCode.county === county
+    } yield postalCode).result
+      /*.headOption.flatMap({
+      case Some(postalCode) =>
+        DBIO.successful(postalCode)
+      case None =>
+        DBIO.successful(null)
+    })*/
+
+    dbio
   }
 
-  def readPostalCode(uuid:UUID):Future[PostalCode] = db.run{
+  def findmanageNumberOfBuilding(manageNumber:String):Future[Option[PostalCode]] = db.run{
+    tableQuery.filter(_.manageNumberOfBuilding === manageNumber).result.headOption
+  }
+
+
+
+  def readPostalCode(county:String = ""):Future[PostalCode] = db.run{
     val dbio = (for{
-      postalCode <- tableQuery if postalCode.uuid === uuid
+      postalCode <- tableQuery if postalCode.county === county
     } yield postalCode).result.headOption.flatMap({
       case Some(postalCode) =>
         DBIO.successful(postalCode)
@@ -52,27 +83,28 @@ class PostalCodeDAO  @Inject() (dbConfigProvider: DatabaseConfigProvider)(implic
     val dbio = (for{
       postalCode <- tableQuery.sortBy(ps=>ps.streetName.asc).drop(offset).take(length)
     } yield
-      (postalCode.uuid, postalCode.postalCode,
-      postalCode.province, postalCode.county, postalCode.town,
-      postalCode.streetNameCode,postalCode.streetName)).result
+      ( postalCode.postalCode,
+        postalCode.province, postalCode.county, postalCode.town,
+        postalCode.streetNameCode,postalCode.streetName)).result
 
     dbio
   }
 
-  private class PostalCodesTable(tag: Tag) extends Table[PostalCode](tag,"PostalCodes") {
-    def uuid = column[UUID]("uuid", O.PrimaryKey)
+
+
+  private class PostalCodesTable(tag: Tag) extends Table[PostalCode](tag,"postal_codes") {
     // primary informations
     def postalCode = column[Option[String]]("postal_code")
 
-    def province = column[Option[String]]("province")
-    def provinceEn = column[Option[String]]("province_en")
-    def county = column[Option[String]]("county")
-    def countyEn = column[Option[String]]("county_en")
-    def town = column[Option[String]]("town")
-    def townEn = column[Option[String]]("town_en")
+    def province = column[Option[String]]("province")                            //인덱스
+    def provinceEn = column[Option[String]]("province_en")                      //인덱스
+    def county = column[Option[String]]("county")                                //인덱스
+    def countyEn = column[Option[String]]("county_en")                          //인덱스
+    def town = column[Option[String]]("town")                                    //인덱스
+    def townEn = column[Option[String]]("town_en")                               //인덱스
     def streetNameCode = column[Option[String]]("street_name_code")
-    def streetName = column[Option[String]]("street_name")
-    def streetNameEn = column[Option[String]]("street_name_en")
+    def streetName = column[Option[String]]("street_name")                        //인덱스
+    def streetNameEn = column[Option[String]]("street_name_en")                   //인덱스
 
     // additional informations
     def basement = column[Option[String]]("basement")
@@ -80,7 +112,7 @@ class PostalCodeDAO  @Inject() (dbConfigProvider: DatabaseConfigProvider)(implic
 
     def primaryNumberOfBuilding = column[Option[String]]("primary_number_of_building")
     def secondaryNumberOfBuilding = column[Option[String]]("secondary_number_of_building")
-    def manageNumberOfBuilding = column[Option[String]]("manage_number_of_building")
+    def manageNumberOfBuilding = column[Option[String]]("manage_number_of_building", O.PrimaryKey)
 
     def massDeliveryName = column[Option[String]]("mass_delivery_name")
     def localBuildingName = column[Option[String]]("local_building_name")
@@ -111,21 +143,20 @@ class PostalCodeDAO  @Inject() (dbConfigProvider: DatabaseConfigProvider)(implic
         Option[String],Option[String],Option[String],Option[String],Option[String], Option[String]
       )
 
-    private type PostalCodeTupleType = (UUID,Option[String],StreetNumberAddressTupleType,AdditionalAddressTupleType)
+    private type PostalCodeTupleType = (Option[String],StreetNumberAddressTupleType,AdditionalAddressTupleType)
 
 
     private val toRow:(PostalCodeTupleType => PostalCode) = {tuple =>
       PostalCode(
-        uuid = tuple._1,
-        postalCode = tuple._2,
-        streetNumberAddress = StreetNumberAddress.tupled.apply(tuple._3),
-        additionalAddress = AdditionalAddress.tupled.apply(tuple._4)
+       // uuid = tuple._1,
+        postalCode = tuple._1,
+        streetNumberAddress = StreetNumberAddress.tupled.apply(tuple._2),
+        additionalAddress = AdditionalAddress.tupled.apply(tuple._3)
       )
     }
 
     private val toTuple:(PostalCode => Option[PostalCodeTupleType]) = { code =>
       Some(
-        code.uuid,
         code.postalCode,
         StreetNumberAddress.unapply(code.streetNumberAddress).get,
         AdditionalAddress.unapply(code.additionalAddress).get
@@ -133,7 +164,6 @@ class PostalCodeDAO  @Inject() (dbConfigProvider: DatabaseConfigProvider)(implic
     }
 
     override def * = (
-      uuid ,
       postalCode,
       (
         province, provinceEn,
@@ -156,19 +186,7 @@ class PostalCodeDAO  @Inject() (dbConfigProvider: DatabaseConfigProvider)(implic
         toRow, toTuple
       )
 
-    def idxPostalCodesPostalCode = index("idx_postal_codes_postalCode", postalCode, unique = false)
-
-    def idxPostalCodesProvince = index("idx_postal_codes_province", province, unique = false)
-    def idxPostalCodesProvinceEn = index("idx_postal_codes_provinceEn", provinceEn, unique = false)
-
-    def idxPostalCodesCounty = index("idx_postal_codes_county", county, unique = false)
-    def idxPostalCodesCountyEn = index("idx_postal_codes_countyEn", countyEn, unique = false)
-
-    def idxPostalCodesTown = index("idx_postal_codes_town", town, unique = false)
-    def idxPostalCodesTownEn = index("idx_postal_codes_townEn", townEn, unique = false)
-
-    def idxPostalCodesStreetName = index("idx_postal_codes_streetName", streetName, unique = false)
-    def idxPostalCodesStreetNameEn = index("idx_postal_codes_streetNameEn", streetNameEn, unique = false)
+    def idxPostalCodes = index("idx_postal_codes",(province, provinceEn, county, countyEn, town, townEn, streetName, streetNameEn) )
   }
 
 }

@@ -6,10 +6,10 @@
 #GET     /                           controllers.HomeController.index
 GET     /       controllers.Assets.at(path="/public", file="index.html")
 
-
-GET     /api/postal/street_name_addresses   controllers.PostalCodesController.streetNameAddresses(offset:Long ?= 0, length:Int ?= 25)
-
 #Setup page : only ApplicationConfig.DatabaseReady == false
 POST     /setup  controllers.DatabaseSetupController.setup
+GET      /all        controllers.HelloController.all
+GET      /find       controllers.HelloController.find(managecode)
+GET     /get         controllers.HelloController.get(country)
 # Map static resources from the /public folder to the /assets URL path
 GET     /*file               controllers.Assets.versioned(path="/public", file: Asset)
