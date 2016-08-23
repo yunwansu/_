@@ -23,7 +23,7 @@ class HelloController @Inject()(postalCodeDAO: PostalCodeDAO)(implicit ec: Execu
     Future {
       val result = Await.result(postalCodeDAO.findmanageNumberOfBuilding(managecode),Duration.Inf)
       result.foreach(println)
-      Ok(Json.toJson(result))
+      Ok(Json.toJson(result)) // find?managecode=3611010500105120002000009
       //Ok
     }
   }
