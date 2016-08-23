@@ -42,9 +42,13 @@ class PostalCodeDAO  @Inject() (dbConfigProvider: DatabaseConfigProvider)(implic
     tableQuery.result
   )
 
-  /*def findbycounty(country :String = ""):Future[Seq[PostalCode]] = db.run(
-    tableQuery.filter(_.county == country).result
-  )*/
+  def findbycounty(country :String = ""):Future[Option[PostalCode]] = db.run(
+    tableQuery.filter(_.county === country).result.headOption
+  )
+
+  def findmanageNumberOfBuilding(manageNumber:String):Future[Option[PostalCode]] = db.run{
+    tableQuery.filter(_.manageNumberOfBuilding === manageNumber).result.headOption
+  }
 
   private class PostalCodesTable(tag: Tag) extends Table[PostalCode](tag,"postal_codes") {
     // primary informations
