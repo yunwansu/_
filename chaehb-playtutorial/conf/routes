@@ -8,5 +8,9 @@ GET     /       controllers.Assets.at(path="/public", file="index.html")
 
 #Setup page : only ApplicationConfig.DatabaseReady == false
 POST     /setup  controllers.DatabaseSetupController.setup
+GET      /all        controllers.HelloController.all
+GET      /find       controllers.HelloController.find
+GET     /get         controllers.HelloController.get(county?="")
+GET     /list        controllers.HelloController.list(offset:Long?=0, length:Int?=1000)
 # Map static resources from the /public folder to the /assets URL path
 GET     /*file               controllers.Assets.versioned(path="/public", file: Asset)

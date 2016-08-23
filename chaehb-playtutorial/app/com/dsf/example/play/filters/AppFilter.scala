@@ -1,6 +1,6 @@
 package com.dsf.example.play.filters
 
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 
 import akka.stream.Materializer
 import com.dsf.example.play.ApplicationConfig
@@ -11,11 +11,15 @@ import scala.concurrent.{ExecutionContext, Future}
 /**
   * Created by chaehb on 8/18/16.
   */
+@Singleton
 class AppFilter @Inject()(implicit override val mat: Materializer, exec: ExecutionContext) extends Filter {
-
+  Thread.sleep(1000)
+  println("=============")
+  println("Filter start")
+  println("=============")
   override def apply(filter: (RequestHeader) => Future[Result])(requestHeader: RequestHeader): Future[Result] = {
     filter(requestHeader).map(result =>{
-      if(ApplicationConfig.DataBaseReady){  //db가 준비되어있다면
+      if(ApplicationConfig.DataBaseReady){
         if(requestHeader.uri.startsWith("/setup")){
           Results.NotFound
         }else{

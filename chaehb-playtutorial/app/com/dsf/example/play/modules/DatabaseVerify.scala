@@ -22,7 +22,6 @@ class DatabaseVerify @Inject()(postalCodeDAO: PostalCodeDAO,lifecycle: Applicati
   // Future[Int]
   // map
   // onComplete, onSuccess & onFailure
-
   postalCodeDAO.count.onComplete{
     case Success(count) =>
       println("Database Ready!")
@@ -31,7 +30,9 @@ class DatabaseVerify @Inject()(postalCodeDAO: PostalCodeDAO,lifecycle: Applicati
       println("Database not Ready. Please initialize it.")
       ApplicationConfig.DataBaseReady = false
   }
+
   lifecycle.addStopHook{() =>
+    println("DB Close")
     Future.successful(postalCodeDAO.close)
   }
 }

@@ -3,11 +3,14 @@ package controllers
 import java.io.File
 import javax.inject.Inject
 
+import akka.actor._
+import akka.stream.Materializer
 import com.dsf.example.play.ApplicationConfig
 import com.dsf.example.play.models.entities.{AdditionalAddress, PostalCode, StreetNumberAddress}
 import com.dsf.example.play.models.pgsql.PostalCodeDAO
-import play.api.mvc.{Action, Controller}
-import play.api.routing.JavaScriptReverseRouter
+import play.api.libs.iteratee.Enumerator
+import play.api.mvc._
+import play.api.libs.streams._
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.io.Source
@@ -15,13 +18,11 @@ import scala.io.Source
 /**
   * Created by chaehb on 8/18/16.
   */
-class DatabaseSetupController @Inject()(postalCodeDAO: PostalCodeDAO)(implicit ec: ExecutionContext) extends Controller {
+class DatabaseSetupController @Inject()(postalCodeDAO: PostalCodeDAO)(implicit ec: ExecutionContext, system:ActorSystem, meterializer:Materializer) extends Controller {
 
   def setup = Action.async {implicit request =>
-    JavaScriptReverseRouter
     println("do setup")
     postalCodeDAO.createTable.onComplete(_ => {
-
       postalCodeDAO.count.map(count => {
         if(count == 0){
           println("insert postal code data ....")
@@ -96,7 +97,7 @@ class DatabaseSetupController @Inject()(postalCodeDAO: PostalCodeDAO)(implicit e
                   val postalCode = PostalCode(Some(columns(0)),streetNumberAddress,additionalAddress)
                   list = postalCode :: list
                   i += 1
-                  if(i % 1000 == 0){  // or map yield
+                  if(i % 10000 == 0){  // or map, yield
                     postalCodeDAO.insertPostalCodes(list)
                     i = 0;
                     list = Nil
@@ -111,12 +112,29 @@ class DatabaseSetupController @Inject()(postalCodeDAO: PostalCodeDAO)(implicit e
             }
           }
           ApplicationConfig.DataBaseReady = true
+        Future(Ok.chunked(Enumerator(ApplicationConfig.DataBaseReady.toString)))
         }else{
           printf("Error")
           Future(BAD_REQUEST)
         }
       })
     })
-    Future(Ok)
+    //Future.successful(Ok)
+    Future(Ok.chunked(Enumerator(ApplicationConfig.DataBaseReady.toString)))
+  }
+
+  def socket = WebSocket.accept[String, String] { request =>
+    ActorFlow.actorRef(out => MyWebSocketActor.props(out))
+  }
+}
+
+object MyWebSocketActor{
+  def props(out:ActorRef) = Props(new MyWebSocketActor(out))
+}
+
+class MyWebSocketActor(out:ActorRef) extends Actor{
+  def receive = {
+    case msg : String =>
+      out ! ("I received your message" + msg)
   }
 }

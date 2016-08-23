@@ -1,8 +1,5 @@
-import com.google.inject.AbstractModule
-import java.time.Clock
-
 import com.dsf.example.play.modules.{AppModule, DatabaseVerify}
-import services.{ApplicationTimer, AtomicCounter, Counter}
+import com.google.inject.AbstractModule
 
 /**
  * This class is a Guice module that tells Guice how to bind several
