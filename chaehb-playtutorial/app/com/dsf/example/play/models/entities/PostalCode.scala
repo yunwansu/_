@@ -1,12 +1,14 @@
 package com.dsf.example.play.models.entities
 
+import java.util.UUID
+
 import play.api.libs.json.Json
 
 /**
   * Created by chaehb on 11/08/2016.
   */
 case class PostalCode(
-                       //uuid:UUID,
+                       uuid:UUID,
 
                        postalCode:Option[String]=None, //우편번호 - 0
 
@@ -14,39 +16,6 @@ case class PostalCode(
 
                         additionalAddress: AdditionalAddress
                      )
-object PostalCode {
-  implicit val streetFormat = Json.format[StreetNumberAddress]
-  implicit val additionalFromat = Json.format[AdditionalAddress]
-  implicit val jsonFormat = Json.format[PostalCode]/*{
-   def writes(p : PostalCode): JsValue = {
-     Json.obj(
-       "postalCode" -> JsString(p.postalCode.get)
-       /*"province" -> JsString(p.streetNumberAddress.province.get),
-       "provinceEn" -> JsString(p.streetNumberAddress.provinceEn.get),
-       "county" -> JsString(p.streetNumberAddress.county.get),
-       "countyEn" -> JsString(p.streetNumberAddress.countyEn.get),
-       "town" -> JsString(p.streetNumberAddress.town.get),
-       "townEn" -> JsString(p.streetNumberAddress.townEn.get),
-       "basement" -> JsString(p.additionalAddress.basement.get),
-       "mountain" -> JsString(p.additionalAddress.mountain.get),
-       "primaryNumberOfBuilding" -> JsString(p.additionalAddress.primaryNumberOfBuilding.get),
-       "secondaryNumberOfBuilding" -> JsString(p.additionalAddress.secondaryNumberOfBuilding.get),
-       "manageNumberOfBuilding" -> JsString(p.additionalAddress.manageNumberOfBuilding.get),
-       "massDeliveryName" -> JsString(p.additionalAddress.massDeliveryName.get),
-       "localBuildingName" -> JsString(p.additionalAddress.localBuildingName.get),
-       "customaryTownCode" -> JsString(p.additionalAddress.customaryTownCode.get),
-       "customaryTownName" -> JsString(p.additionalAddress.customaryTownName.get),
-       "village" -> JsString(p.additionalAddress.village.get),
-       "administrativeTownName" -> JsString(p.additionalAddress.administrativeTownName.get),
-       "primaryLotNumber" -> JsString(p.additionalAddress.primaryLotNumber.get),
-       "secondaryLotNumber" -> JsString(p.additionalAddress.secondaryLotNumber.get),
-       "serialNumberOfTown" -> JsString(p.additionalAddress.serialNumberOfTown.get),
-       "previousPostalCode" -> JsString(p.additionalAddress.previousPostalCode.get),
-       "serialNumberOfPostalCode" -> JsString(p.additionalAddress.serialNumberOfPostalCode.get)*/
-     )
-   }
-  }*/
-}
 
 case class StreetNumberAddress(
                                 province:Option[String]=None, provinceEn:Option[String]=None, // 시도 - 1, 2
@@ -55,23 +24,6 @@ case class StreetNumberAddress(
 
                                 streetNameCode:Option[String]=None, streetName:Option[String]=None, streetNameEn:Option[String]=None // 도로명코드, 도로명 - 7, 8, 9
                               )
-/*object StreetNumberAddress {
-  implicit val jsonFormat = Json.format[StreetNumberAddress]/*{
-    def writes(s : StreetNumberAddress):JsValue = {
-      Json.obj(
-        "province" -> JsString(s.province.get),
-        "provinceEn" -> JsString(s.provinceEn.get),
-        "county" -> JsString(s.county.get),
-        "countyEn" -> JsString(s.countyEn.get),
-        "town" -> JsString(s.town.get),
-        "townEn" -> JsString(s.townEn.get),
-        "streetNameCode" -> JsString(s.streetNameCode.get),
-        "streetName" -> JsString(s.streetName.get),
-        "streetNameEn" -> JsString(s.streetNameEn.get)
-      )
-    }
-  }*/
-}*/
 
 case class AdditionalAddress(
                               basement:Option[String]=None, mountain:Option[String]=None, // '지하'여부, '산'여부 - 10, 20
@@ -87,27 +39,10 @@ case class AdditionalAddress(
                               previousPostalCode:Option[String]=None, // 구우편번호 - 24
                               serialNumberOfPostalCode:Option[String]=None // 우편번 일련번호 - 25
                             )
-/*object AdditionalAddress {
-  implicit val jsonFormat = Json.format[StreetNumberAddress]/*{
-    def writes(a : AdditionalAddress):JsValue = {
-      Json.obj(
-        "basement" -> JsString(a.basement.get),
-        "mountain" -> JsString(a.mountain.get),
-        "primaryNumberOfBuilding" -> JsString(a.primaryNumberOfBuilding.get),
-        "secondaryNumberOfBuilding" -> JsString(a.secondaryNumberOfBuilding.get),
-        "manageNumberOfBuilding" -> JsString(a.manageNumberOfBuilding.get),
-        "massDeliveryName" -> JsString(a.massDeliveryName.get),
-        "localBuildingName" -> JsString(a.localBuildingName.get),
-        "customaryTownCode" -> JsString(a.customaryTownCode.get),
-        "customaryTownName" -> JsString(a.customaryTownName.get),
-        "village" -> JsString(a.village.get),
-        "administrativeTownName" -> JsString(a.administrativeTownName.get),
-        "primaryLotNumber" -> JsString(a.primaryLotNumber.get),
-        "secondaryLotNumber" -> JsString(a.secondaryLotNumber.get),
-        "serialNumberOfTown" -> JsString(a.serialNumberOfTown.get),
-        "previousPostalCode" -> JsString(a.previousPostalCode.get),
-        "serialNumberOfPostalCode" -> JsString(a.serialNumberOfPostalCode.get)
-      )
-    }
-  }*/
-}*/
+
+case class StreetNumberAddressPostalCode(uuid:UUID,postalCode:Option[String],province:Option[String], county:Option[String], town:Option[String], streetNameCode:Option[String], streetName:Option[String])
+object StreetNumberAddressPostalCode {
+  implicit val jsonFormat = Json.format[StreetNumberAddressPostalCode]
+
+//  def tupled = (this.apply _).tupled
+}

@@ -2,17 +2,16 @@ package com.dsf.example.play.modules
 
 import javax.inject.Inject
 
-import com.dsf.example.play.ApplicationConfig
 import com.dsf.example.play.models.pgsql.PostalCodeDAO
-import play.api.inject.ApplicationLifecycle
+import com.dsf.example.play.{ApplicationConfig, DBState}
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 import scala.util.{Failure, Success}
 
 /**
   * Created by chaehb on 11/08/2016.
   */
-class DatabaseVerify @Inject()(postalCodeDAO: PostalCodeDAO,lifecycle: ApplicationLifecycle)(implicit ec: ExecutionContext) {
+class DatabaseVerify @Inject()(postalCodeDAO: PostalCodeDAO)(implicit ec: ExecutionContext) {
 
   // check tables
   println("==============")
@@ -25,14 +24,15 @@ class DatabaseVerify @Inject()(postalCodeDAO: PostalCodeDAO,lifecycle: Applicati
 
   postalCodeDAO.count.onComplete{
     case Success(count) =>
-      println("Database Ready!")
-      ApplicationConfig.DataBaseReady = true
+      if(count == 0){
+        println("Database not Ready. Please add rows.")
+        ApplicationConfig.DatabaseState = DBState.NoData
+      }else {
+        println("Database Ready!")
+        ApplicationConfig.DatabaseState = DBState.Ready
+      }
     case Failure(t) =>
       println("Database not Ready. Please initialize it.")
-      ApplicationConfig.DataBaseReady = false
-  }
-  lifecycle.addStopHook{() =>
-    println("DB Close")
-    Future.successful(postalCodeDAO.close)
+      ApplicationConfig.DatabaseState = DBState.NotInitialized
   }
 }

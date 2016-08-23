@@ -3,7 +3,7 @@ package com.dsf.example.play.filters
 import javax.inject.Inject
 
 import akka.stream.Materializer
-import com.dsf.example.play.ApplicationConfig
+import com.dsf.example.play.{ApplicationConfig, DBState}
 import play.api.mvc.{Filter, RequestHeader, Result, Results}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -15,7 +15,7 @@ class AppFilter @Inject()(implicit override val mat: Materializer, exec: Executi
 
   override def apply(filter: (RequestHeader) => Future[Result])(requestHeader: RequestHeader): Future[Result] = {
     filter(requestHeader).map(result =>{
-      if(ApplicationConfig.DataBaseReady){
+      if(ApplicationConfig.DatabaseState == DBState.Ready){
         if(requestHeader.uri.startsWith("/setup")){
           Results.NotFound
         }else{
