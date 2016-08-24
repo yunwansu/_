@@ -1,4 +1,4 @@
-package controllers
+/*package controllers
 
 import javax.inject.Inject
 
@@ -28,3 +28,4 @@ class PostalCodesController @Inject()(postalCodeDAO: PostalCodeDAO)(implicit ec:
     })
   }
 }
+*/

@@ -13,7 +13,9 @@ import scala.concurrent.{ExecutionContext, Future}
   */
 @Singleton
 class AppFilter @Inject()(implicit override val mat: Materializer, exec: ExecutionContext) extends Filter {
-  Thread.sleep(1000)
+  while(ApplicationConfig.ModuleState == false) {
+    Thread.sleep(1000)
+  }
   println("=============")
   println("Filter start")
   println("=============")

@@ -5,4 +5,5 @@ package com.dsf.example.play
   */
 object ApplicationConfig {
   var DataBaseReady = false
+  var ModuleState = false
 }

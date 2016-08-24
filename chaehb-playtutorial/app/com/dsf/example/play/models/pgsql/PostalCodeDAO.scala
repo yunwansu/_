@@ -28,6 +28,11 @@ class PostalCodeDAO  @Inject() (dbConfigProvider: DatabaseConfigProvider)(implic
   def count = db.run {
     tableQuery.length.result
   }
+
+  def filterCount(data:String) = db.run{
+    tableQuery.filter(_.manageNumberOfBuilding === data).length.result
+  }
+
   def close = db.close()
 
   def insertPostalCode(row:PostalCode) = Await.result(db.run {
@@ -42,26 +47,36 @@ class PostalCodeDAO  @Inject() (dbConfigProvider: DatabaseConfigProvider)(implic
     tableQuery.result
   )
 
-  def findbycounty(country :String = ""):Future[Option[PostalCode]] = db.run(
-    tableQuery.filter(_.county === country).result.headOption
-  )
-
-  def listcounty(county:String = ""):Future[PostalCode] = db.run{
-    val dbio = (for{
+  def findbycounty(county :String) = db.run {
+    val dbio = (for {
       postalCode <- tableQuery if postalCode.county === county
     } yield postalCode).result
-      /*.headOption.flatMap({
-      case Some(postalCode) =>
-        DBIO.successful(postalCode)
-      case None =>
-        DBIO.successful(null)
-    })*/
 
     dbio
   }
 
-  def findmanageNumberOfBuilding(manageNumber:String):Future[Option[PostalCode]] = db.run{
-    tableQuery.filter(_.manageNumberOfBuilding === manageNumber).result.headOption
+  def listcounty(county:String = ""):Future[PostalCode] = db.run{
+    val dbio = (for{
+      postalCode <- tableQuery if postalCode.county === county
+    } yield postalCode).result.headOption.flatMap({
+      case Some(postalCode) =>
+        DBIO.successful(postalCode)
+      case None =>
+        DBIO.successful(null)
+    })
+
+    dbio
+  }
+
+  def findmanageNumberOfBuilding(manageNumber:String) = db.run{
+    val dbio = (for{
+      postalCode <- tableQuery if (postalCode.manageNumberOfBuilding === manageNumber || postalCode.county === manageNumber || postalCode.countyEn === manageNumber ||
+                                    postalCode.town === manageNumber || postalCode.townEn === manageNumber||
+                                    postalCode.streetName === manageNumber || postalCode.streetNameEn === manageNumber)
+    }yield postalCode).result
+    //tableQuery.filter(_.manageNumberOfBuilding === manageNumber).result.headOption
+
+    dbio
   }
 
 
@@ -82,10 +97,7 @@ class PostalCodeDAO  @Inject() (dbConfigProvider: DatabaseConfigProvider)(implic
   def list(offset:Long, length:Int) = db.run{
     val dbio = (for{
       postalCode <- tableQuery.sortBy(ps=>ps.streetName.asc).drop(offset).take(length)
-    } yield
-      ( postalCode.postalCode,
-        postalCode.province, postalCode.county, postalCode.town,
-        postalCode.streetNameCode,postalCode.streetName)).result
+    } yield postalCode).result
 
     dbio
   }
@@ -188,5 +200,4 @@ class PostalCodeDAO  @Inject() (dbConfigProvider: DatabaseConfigProvider)(implic
 
     def idxPostalCodes = index("idx_postal_codes",(province, provinceEn, county, countyEn, town, townEn, streetName, streetNameEn) )
   }
-
 }

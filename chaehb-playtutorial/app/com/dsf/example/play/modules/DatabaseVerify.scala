@@ -26,9 +26,11 @@ class DatabaseVerify @Inject()(postalCodeDAO: PostalCodeDAO,lifecycle: Applicati
     case Success(count) =>
       println("Database Ready!")
       ApplicationConfig.DataBaseReady = true
+      ApplicationConfig.ModuleState = true
     case Failure(t) =>
       println("Database not Ready. Please initialize it.")
       ApplicationConfig.DataBaseReady = false
+      ApplicationConfig.ModuleState = true
   }
 
   lifecycle.addStopHook{() =>

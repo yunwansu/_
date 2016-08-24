@@ -16,51 +16,58 @@
     <script>
         $(document).ready(function(){
             $('#example').DataTable({
-                ajax : {
-                    url : "/find",
-                    datasrc : ""
-                }
+               "bProcessing":true,
+                "bServerSide":true,
+                //type:"POST",
+                //"sAjaxSource":"/list",
+                //"sAjaxDataProp" : "aaData",
+               // sAjaxtype : "POST",
+                "ajax" : {
+                         "url": "/find",
+                    //contentType: 'application/json',
+                    "DataProp": "aaData",
+                    //  dataType:"jsonp",
+                    "type": "POST"
+                },
+                 /*   "data": function ( d ) {
+                        return $.extend( {}, d, {
+                            "extra_search": $('#extra').val()
+                        } );
+                    }
+                },
+                //data : data,
+                */"aoColumns":[
+                    {"mData":"postalCode"},
+                    {"mData":"streetNumberAddress.province"},
+                    {"mData":"streetNumberAddress.county"},
+                    {"mData":"streetNumberAddress.town"},
+                    {"mData":"streetNumberAddress.streetNameCode"},
+                    {"mData":"streetNumberAddress.streetName"}
+                ],
+                ordering:false
             });
         });
     </script>
 </head>
 <body>
 <h1>Hello, world!</h1>
-<div>
+
+<div class="container">
 <table id="example" class="display" cellspacing="0" width="100%">
     <thead>
         <tr>
-            <th>새우편주소</th>
-            <th>시도</th>
-            <th>시도 영문</th>
+            <th>우편번호</th>
+            <td>시도</td>
             <th>시군구</th>
-            <th>시군구 영문</th>
-            <th>읍면</th>
-            <th>읍면 영문</th>
-            <th>도로명 코드</th>
+            <th>읍면동</th>
+            <th>도로명코드</th>
             <th>도로명</th>
-            <th>도로명 영문</th>
-            <th>지하 여부</th>
-            <th>건물번호 본번</th>
-            <th>건물번호 부번</th>
-            <th>건물관리 번호</th>
-            <th>다량배달처명</th>
-            <th>시군구용 건물명</th>
-            <th>법정동 코드</th>
-            <th>법정동 명</th>
-            <th>리 명</th>
-            <th>행정동 명</th>
-            <th>산 여부</th>
-            <th>지번 본번</th>
-            <th>읍면동 일련번호</th>
-            <th>지번 부번</th>
-            <th>구 우편번호</th>
-            <th>우편번호 일련번호</th>
         </tr>
     </thead>
-    <tbody><tr><td>fd</td><td>f</td></tr></tbody>
+    <tbody></tbody>
 </table>
 </div>
+
 <!-- jQuery first, then Tether, then Bootstrap JS. -->
 </body>
 </html>
