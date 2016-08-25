@@ -23,21 +23,27 @@ class HelloController @Inject()(postalCodeDAO: PostalCodeDAO)(implicit ec: Execu
   def find= Action.async { implicit request =>
     println(request.body.asFormUrlEncoded.get.get("search[value]").get.head)
     //println(request.getQueryString("draw"))
-
+    println(RquestBody())
+      println(request.body)
       val draw = request.body.asFormUrlEncoded.get.get("draw").get.head
       val data = request.body.asFormUrlEncoded.get.get("search[value]").get.head
     //  val recordsTotal = request.getQueryString("recordsTotal").get.toInt
     //  val recordsFiltered = request.getQueryString("recordsFiltered").get.toInt
       val count = Await.result(postalCodeDAO.filterCount(s"$data"), Duration.Inf)
       //val result = Await.result(postalCodeDAO.findmanageNumberOfBuilding(s"$data"), Duration.Inf)
-        postalCodeDAO.findmanageNumberOfBuilding(s"$data").map(result =>{
+        postalCodeDAO.PostalCodes_search(s"$data").map(result =>{
           if(result.isEmpty){
-            Ok("{ \"draw\":"+draw+", \"recordsTotal\":"+6198481+", \"recordsFiltered\":"+count+", \"aaData\":{}}").as("app366+lication/json charset='utf-8'")
+            Ok("{ \"draw\":"+draw+", \"recordsTotal\":"+6198481+", \"recordsFiltered\":"+count+", \"aaData\":{}}").as("application/json charset='utf-8'")
           }else{
             val list = result.map(ps =>{
               (PostalCode.apply _).tupled(ps.postalCode, ps.streetNumberAddress, ps.additionalAddress)
             })
-            Ok("{ \"draw\":"+draw+", \"recordsTotal\":"+6198481+", \"recordsFiltered\":"+count+", \"aaData\":"+Json.toJson(list)+"}").as("app366+lication/json charset='utf-8'")
+            val data = "{ \"draw\":"+draw+", \"recordsTotal\":"+6198481+", \"recordsFiltered\":"+count+", \"aaData\":"+Json.toJson(list)+"}"
+            /*Result(
+              header = ResponseHeader(200, Map(CONTENT_LENGTH -> data.toString.length.toString, CONTENT_TYPE -> "application/json charset='utf-8'")),
+              body = data
+            )*/
+            Ok(data).as("application/json charset='utf-8'")
           }
         })
      // result.foreach(println)

@@ -11,6 +11,6 @@ POST     /setup  controllers.DatabaseSetupController.setup
 GET      /all        controllers.HelloController.all
 POST      /find       controllers.HelloController.find
 GET     /get         controllers.HelloController.get(county?="")
-POST     /list        controllers.HelloController.list(offset:Long?=0, length:Int?=25)
+GET     /list        controllers.HelloController.list(offset:Long?=0, length:Int?=25)
 # Map static resources from the /public folder to the /assets URL path
 GET     /*file               controllers.Assets.versioned(path="/public", file: Asset)

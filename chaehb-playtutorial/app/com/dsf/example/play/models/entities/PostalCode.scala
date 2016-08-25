@@ -111,3 +111,13 @@ case class AdditionalAddress(
     }
   }*/
 }*/
+
+case class DataTables_ResponData(           //Response Data
+                                draw:Int,
+                                recordsTotal:Int,
+                                recordsFiltered:Int,
+                                data:String
+                                )
+object DataTables_ResponData {
+  implicit val responeFormat = Json.format[DataTables_ResponData] //ResponData to JsonFormat
+}

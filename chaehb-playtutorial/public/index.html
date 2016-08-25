@@ -42,9 +42,13 @@
                     {"mData":"streetNumberAddress.county"},
                     {"mData":"streetNumberAddress.town"},
                     {"mData":"streetNumberAddress.streetNameCode"},
-                    {"mData":"streetNumberAddress.streetName"}
+                    {"mData":"streetNumberAddress.streetName"},
+                    {"mData":"additionalAddress.primaryNumberOfBuilding"}
                 ],
-                ordering:false
+                "ordering":false,
+                "paging":true,
+                "processing":true,
+                "pageLength":10
             });
         });
     </script>
@@ -62,12 +66,19 @@
             <th>읍면동</th>
             <th>도로명코드</th>
             <th>도로명</th>
+            <th>건물번호</th>
         </tr>
     </thead>
     <tbody></tbody>
 </table>
 </div>
 
+<script>
+    // For demo to fit into DataTables site builder...
+    $('#example')
+            .removeClass( 'display' )
+            .addClass('table table-striped table-bordered');
+</script>
 <!-- jQuery first, then Tether, then Bootstrap JS. -->
 </body>
 </html>
