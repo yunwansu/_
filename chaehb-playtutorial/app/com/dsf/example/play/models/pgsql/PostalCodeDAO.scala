@@ -69,11 +69,11 @@ class PostalCodeDAO  @Inject() (dbConfigProvider: DatabaseConfigProvider)(implic
     dbio
   }
 
-  def PostalCodes_search(data:String) = db.run{
+  def PostalCodes_search(data:String, list_length:Int = 10) = db.run{
     val dbio = (for{
       postalCode <- tableQuery if (postalCode.province === data || postalCode.provinceEn === data || postalCode.county === data || postalCode.countyEn === data ||
                                     postalCode.town === data || postalCode.townEn === data || postalCode.streetName === data || postalCode.streetNameEn === data)
-    }yield postalCode).drop(0).take(10).result
+    }yield postalCode).drop(0).take(list_length).result
     //tableQuery.filter(_.manageNumberOfBuilding === manageNumber).result.headOption
 
     dbio

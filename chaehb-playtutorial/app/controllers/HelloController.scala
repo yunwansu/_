@@ -2,7 +2,7 @@ package controllers
 
 import javax.inject.Inject
 
-import com.dsf.example.play.models.entities.PostalCode
+import com.dsf.example.play.models.entities.{DataTables_ResponData, PostalCode}
 import com.dsf.example.play.models.pgsql.PostalCodeDAO
 import play.api.libs.json._
 import play.api.mvc.{Action, Controller}
@@ -20,38 +20,32 @@ class HelloController @Inject()(postalCodeDAO: PostalCodeDAO)(implicit ec: Execu
       Ok("Hello, " + name)
     }
   }
-  def find= Action.async { implicit request =>
+  def find = Action.async { implicit request =>
     println(request.body.asFormUrlEncoded.get.get("search[value]").get.head)
+    //println(request.queryString.get("draw"))
+    //println(request.body.asFormUrlEncoded.get.toString())
     //println(request.getQueryString("draw"))
-    println(RquestBody())
-      println(request.body)
-      val draw = request.body.asFormUrlEncoded.get.get("draw").get.head
-      val data = request.body.asFormUrlEncoded.get.get("search[value]").get.head
+    //println(RquestBody())
+     // println(request.body)
+    val draw               = request.body.asFormUrlEncoded.get.get("draw").get.head.toInt
+    val data               = request.body.asFormUrlEncoded.get.get("search[value]").get.head
+    val length             = request.body.asFormUrlEncoded.get.get("length").get.head.toInt
+    val search_list_length = postalCodeDAO.filterCount(data).toString match {
+      case i => i.toInt
+    }
     //  val recordsTotal = request.getQueryString("recordsTotal").get.toInt
     //  val recordsFiltered = request.getQueryString("recordsFiltered").get.toInt
-      val count = Await.result(postalCodeDAO.filterCount(s"$data"), Duration.Inf)
-      //val result = Await.result(postalCodeDAO.findmanageNumberOfBuilding(s"$data"), Duration.Inf)
-        postalCodeDAO.PostalCodes_search(s"$data").map(result =>{
+
+    postalCodeDAO.PostalCodes_search(data, length).map(result =>{
           if(result.isEmpty){
-            Ok("{ \"draw\":"+draw+", \"recordsTotal\":"+6198481+", \"recordsFiltered\":"+count+", \"aaData\":{}}").as("application/json charset='utf-8'")
+            Ok(Json.toJson(DataTables_ResponData(draw)))
           }else{
             val list = result.map(ps =>{
               (PostalCode.apply _).tupled(ps.postalCode, ps.streetNumberAddress, ps.additionalAddress)
             })
-            val data = "{ \"draw\":"+draw+", \"recordsTotal\":"+6198481+", \"recordsFiltered\":"+count+", \"aaData\":"+Json.toJson(list)+"}"
-            /*Result(
-              header = ResponseHeader(200, Map(CONTENT_LENGTH -> data.toString.length.toString, CONTENT_TYPE -> "application/json charset='utf-8'")),
-              body = data
-            )*/
-            Ok(data).as("application/json charset='utf-8'")
+            Ok(Json.toJson(DataTables_ResponData(draw, 6198481, search_list_length, list)))
           }
         })
-     // result.foreach(println)
-     /* val json = Json.obj(
-        "draw" -> JsNumber(draw),
-        "recordsTotal"->JsNumber(6198481),
-        "recordsFiltered"->JsNumber(1)
-      )*/
       //println(json)
      // Ok("{ \"draw\":"+draw+", \"recordsTotal\":"+6198481+", \"recordsFiltered\":"+count+", \"aaData\":["+Json.toJson(result)+"]}").as("app366+lication/json charset='utf-8'") // find?managecode=3611010500105120002000009
       //Ok

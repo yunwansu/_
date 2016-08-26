@@ -16,16 +16,21 @@
     <script>
         $(document).ready(function(){
             $('#example').DataTable({
-               "bProcessing":true,
-                "bServerSide":true,
+               "Processing":true,
+                "serverSide":true,
                 //type:"POST",
                 //"sAjaxSource":"/list",
                 //"sAjaxDataProp" : "aaData",
                // sAjaxtype : "POST",
                 "ajax" : {
-                         "url": "/find",
+                         "url": "/postal_codes_search",
                     //contentType: 'application/json',
-                    "DataProp": "aaData",
+                    "dataSrc": function ( json ) {
+                        for ( var i=0, ien=json.data.length ; i<ien ; i++ ) {
+                            json.data[i][0] = '<a href="/message/'+json.data[i][0]+'>View message</a>';
+                        }
+                        return json.data;
+                    },
                     //  dataType:"jsonp",
                     "type": "POST"
                 },
@@ -36,19 +41,20 @@
                     }
                 },
                 //data : data,
-                */"aoColumns":[
-                    {"mData":"postalCode"},
-                    {"mData":"streetNumberAddress.province"},
-                    {"mData":"streetNumberAddress.county"},
-                    {"mData":"streetNumberAddress.town"},
-                    {"mData":"streetNumberAddress.streetNameCode"},
-                    {"mData":"streetNumberAddress.streetName"},
-                    {"mData":"additionalAddress.primaryNumberOfBuilding"}
+                */"columns":[
+                    {"data":"postalCode"},
+                    {"data":"streetNumberAddress.province"},
+                    {"data":"streetNumberAddress.county"},
+                    {"data":"streetNumberAddress.town"},
+                    {"data":"streetNumberAddress.streetNameCode"},
+                    {"data":"streetNumberAddress.streetName"},
+                    {"data":"additionalAddress.primaryNumberOfBuilding"}
                 ],
                 "ordering":false,
-                "paging":true,
-                "processing":true,
-                "pageLength":10
+                //"paging":true,
+                //"processing":true,
+                //"pageLength": 50
+               // "pageLength":20
             });
         });
     </script>
