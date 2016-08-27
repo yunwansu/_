@@ -30,9 +30,8 @@ class HelloController @Inject()(postalCodeDAO: PostalCodeDAO)(implicit ec: Execu
     val draw               = request.body.asFormUrlEncoded.get.get("draw").get.head.toInt
     val data               = request.body.asFormUrlEncoded.get.get("search[value]").get.head
     val length             = request.body.asFormUrlEncoded.get.get("length").get.head.toInt
-    val search_list_length = postalCodeDAO.filterCount(data).toString match {
-      case i => i.toInt
-    }
+    val search_list_length = postalCodeDAO.filterCount(data).
+    println(search_list_length)
     //  val recordsTotal = request.getQueryString("recordsTotal").get.toInt
     //  val recordsFiltered = request.getQueryString("recordsFiltered").get.toInt
 
@@ -43,7 +42,7 @@ class HelloController @Inject()(postalCodeDAO: PostalCodeDAO)(implicit ec: Execu
             val list = result.map(ps =>{
               (PostalCode.apply _).tupled(ps.postalCode, ps.streetNumberAddress, ps.additionalAddress)
             })
-            Ok(Json.toJson(DataTables_ResponData(draw, 6198481, search_list_length, list)))
+            Ok(Json.toJson(DataTables_ResponData(draw, 6198481, 10, list)))
           }
         })
       //println(json)

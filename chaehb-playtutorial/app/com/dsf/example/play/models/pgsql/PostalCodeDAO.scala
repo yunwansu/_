@@ -3,6 +3,7 @@ package com.dsf.example.play.models.pgsql
 //import java.util.UUID
 import javax.inject.Inject
 
+import akka.actor.Status.Success
 import com.dsf.example.play.models.entities._
 import play.api.db.slick.DatabaseConfigProvider
 import slick.driver.JdbcProfile
@@ -31,7 +32,7 @@ class PostalCodeDAO  @Inject() (dbConfigProvider: DatabaseConfigProvider)(implic
 
   def filterCount(data:String) = db.run{
     tableQuery.filter(postalCode => postalCode.province === data || postalCode.provinceEn === data || postalCode.county === data || postalCode.countyEn === data ||
-                      postalCode.town === data || postalCode.townEn === data || postalCode.streetName === data || postalCode.streetNameEn === data).length.result
+      postalCode.town === data || postalCode.townEn === data || postalCode.streetName === data || postalCode.streetNameEn === data).length.result
   }
 
   def close = db.close()

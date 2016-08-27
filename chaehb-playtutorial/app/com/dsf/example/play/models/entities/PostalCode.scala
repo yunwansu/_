@@ -2,6 +2,8 @@ package com.dsf.example.play.models.entities
 
 import play.api.libs.json.Json
 
+import scala.concurrent.Future
+
 /**
   * Created by chaehb on 11/08/2016.
   */
