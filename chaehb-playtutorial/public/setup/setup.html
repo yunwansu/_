@@ -37,15 +37,7 @@
             },
             success:function(result,status,xhr){
                 //window.location.href = "/index.html";
-                if(result == false) {
-                    $.ajax({
-                        method: "POST",
-                        url: "/setup",
-                        data: '{}'
-                    })
-                }else if(result == true){
-                    $(".center p").text("데이터베이스 초기화를 완료하였습니다.")
-                }
+                $(".center p").text("데이터베이스 초기화를 완료하였습니다.")
             },
             error:function (xhr,status,err) {
                 alert(err);

@@ -20,33 +20,33 @@ import scala.io.Source
   */
 class DatabaseSetupController @Inject()(postalCodeDAO: PostalCodeDAO)(implicit ec: ExecutionContext, system:ActorSystem, meterializer:Materializer) extends Controller {
 
-  def setup = Action.async {implicit request =>
+  def setup = Action.async { implicit request =>
     println("do setup")
-    postalCodeDAO.createTable.onComplete(_ => {
+    postalCodeDAO.createTable.map(_ => {
       postalCodeDAO.count.map(count => {
-        if(count == 0){
+        if (count == 0) {
           println("insert postal code data ....")
 
           val dataDirectory = new File("data/K_POSTAL")
-          if(dataDirectory.exists()){
+          if (dataDirectory.exists()) {
             val revisions = dataDirectory.listFiles().filter(_.isDirectory).sortBy(_.getName)
-            if(revisions.nonEmpty) {
+            if (revisions.nonEmpty) {
               val dataFiles = revisions.last.listFiles().filter(f => f.getName.endsWith(".txt"))
               dataFiles.foreach(f => {
                 println(f.getName)
-                val codes = Source.fromFile(f,"x-windows-949")
-                var list : List[PostalCode] = Nil
+                val codes = Source.fromFile(f, "x-windows-949")
+                var list: List[PostalCode] = Nil
                 var i = 0
-                codes.getLines().filterNot(l => l.startsWith("새우편번호")).foreach(line =>{
+                codes.getLines().filterNot(l => l.startsWith("새우편번호")).foreach(line => {
                   val columns = line.split("\\|")
                   val streetNumberAddress = StreetNumberAddress(
-                    Some(columns(1)),Some(columns(2)),
-                    Some(columns(3)),Some(columns(4)),
-                    Some(columns(5)),Some(columns(6)),
-                    Some(columns(7)),Some(columns(8)),Some(columns(9))
+                    Some(columns(1)), Some(columns(2)),
+                    Some(columns(3)), Some(columns(4)),
+                    Some(columns(5)), Some(columns(6)),
+                    Some(columns(7)), Some(columns(8)), Some(columns(9))
                   )
 
-                  val additionalAddress = if(columns.length ==26) {
+                  val additionalAddress = if (columns.length == 26) {
                     println(line)
 
                     AdditionalAddress(
@@ -62,7 +62,7 @@ class DatabaseSetupController @Inject()(postalCodeDAO: PostalCodeDAO)(implicit e
                       Some(columns(24)),
                       Some(columns(25))
                     )
-                  }else if(columns.length ==25) {
+                  } else if (columns.length == 25) {
                     println(line)
 
                     AdditionalAddress(
@@ -78,7 +78,7 @@ class DatabaseSetupController @Inject()(postalCodeDAO: PostalCodeDAO)(implicit e
                       Some(columns(24)),
                       Some("")
                     )
-                  }else{
+                  } else {
                     AdditionalAddress(
                       Some(columns(10)), Some(columns(20)),
                       Some(columns(11)), Some(columns(12)), Some(columns(13)),
@@ -94,17 +94,18 @@ class DatabaseSetupController @Inject()(postalCodeDAO: PostalCodeDAO)(implicit e
                     )
                   }
 
-                  val postalCode = PostalCode(Some(columns(0)),streetNumberAddress,additionalAddress)
+                  val postalCode = PostalCode(Some(columns(0)), streetNumberAddress, additionalAddress)
                   list = postalCode :: list
                   i += 1
-                  if(i % 10000 == 0){  // or map, yield
+                  if (i % 10000 == 0) {
+                    // or map, yield
                     postalCodeDAO.insertPostalCodes(list)
                     i = 0;
                     list = Nil
                   }
                   //postalCodeDAO.insertPostalCode(postalCode)
                 }) //end TextFile getLine
-                if(!list.isEmpty){
+                if (!list.isEmpty) {
                   postalCodeDAO.insertPostalCodes(list)
                   list = Nil
                 }
@@ -112,29 +113,14 @@ class DatabaseSetupController @Inject()(postalCodeDAO: PostalCodeDAO)(implicit e
             }
           }
           ApplicationConfig.DataBaseReady = true
-        Future(Ok.chunked(Enumerator(ApplicationConfig.DataBaseReady.toString)))
-        }else{
+          Future(Ok)
+        } else {
           printf("Error")
           Future(BAD_REQUEST)
         }
       })
     })
     //Future.successful(Ok)
-    Future(Ok.chunked(Enumerator(ApplicationConfig.DataBaseReady.toString)))
-  }
-
-  def socket = WebSocket.accept[String, String] { request =>
-    ActorFlow.actorRef(out => MyWebSocketActor.props(out))
-  }
-}
-
-object MyWebSocketActor{
-  def props(out:ActorRef) = Props(new MyWebSocketActor(out))
-}
-
-class MyWebSocketActor(out:ActorRef) extends Actor{
-  def receive = {
-    case msg : String =>
-      out ! ("I received your message" + msg)
+    Future(Ok)
   }
 }

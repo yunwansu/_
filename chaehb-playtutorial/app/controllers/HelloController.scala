@@ -20,29 +20,30 @@ class HelloController @Inject()(postalCodeDAO: PostalCodeDAO)(implicit ec: Execu
       Ok("Hello, " + name)
     }
   }
-  def find = Action.async { implicit request =>
+  def postal_codes_search = Action.async { implicit request =>
     println(request.body.asFormUrlEncoded.get.get("search[value]").get.head)
     //println(request.queryString.get("draw"))
-    //println(request.body.asFormUrlEncoded.get.toString())
+    println(request.body.asFormUrlEncoded.get.toString())
     //println(request.getQueryString("draw"))
     //println(RquestBody())
      // println(request.body)
     val draw               = request.body.asFormUrlEncoded.get.get("draw").get.head.toInt
     val data               = request.body.asFormUrlEncoded.get.get("search[value]").get.head
+    val start              = request.body.asFormUrlEncoded.get.get("start").get.head.toInt
     val length             = request.body.asFormUrlEncoded.get.get("length").get.head.toInt
-    val search_list_length = postalCodeDAO.filterCount(data).
-    println(search_list_length)
+    val search_list_length = postalCodeDAO.filterCount(data).toInt
+
     //  val recordsTotal = request.getQueryString("recordsTotal").get.toInt
     //  val recordsFiltered = request.getQueryString("recordsFiltered").get.toInt
 
-    postalCodeDAO.PostalCodes_search(data, length).map(result =>{
+    postalCodeDAO.PostalCodes_search(data, start, length).map(result =>{
           if(result.isEmpty){
             Ok(Json.toJson(DataTables_ResponData(draw)))
           }else{
             val list = result.map(ps =>{
               (PostalCode.apply _).tupled(ps.postalCode, ps.streetNumberAddress, ps.additionalAddress)
             })
-            Ok(Json.toJson(DataTables_ResponData(draw, 6198481, 10, list)))
+            Ok(Json.toJson(DataTables_ResponData(draw, 6198481, search_list_length, list)))
           }
         })
       //println(json)

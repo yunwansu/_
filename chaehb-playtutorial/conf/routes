@@ -9,7 +9,7 @@ GET      /                           controllers.Assets.at(path="/public", file=
 #Setup page : only ApplicationConfig.DatabaseReady == false
 POST     /setup                      controllers.DatabaseSetupController.setup
 GET      /all                        controllers.HelloController.all
-POST     /postal_codes_search        controllers.HelloController.find
+POST     /postal_codes_search        controllers.HelloController.postal_codes_search
 GET      /get                        controllers.HelloController.get(county?="")
 GET      /list                       controllers.HelloController.list(offset:Long?=0, length:Int?=25)
 # Map static resources from the /public folder to the /assets URL path
