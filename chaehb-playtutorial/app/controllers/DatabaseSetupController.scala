@@ -119,6 +119,7 @@ class DatabaseSetupController @Inject()(postalCodeDAO: PostalCodeDAO)(implicit e
           Future(BAD_REQUEST)
         }
       })
+      //Future(Ok)
     })
     //Future.successful(Ok)
     Future(Ok)
